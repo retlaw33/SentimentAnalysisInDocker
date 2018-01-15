@@ -5,6 +5,16 @@ import pandas as pd
 import numpy as np 
 import json 
 
+app = Flask(__name__)
+
+@app.route('/', methods=['POST'])
+def RunSentimentAnalysis():
+	if not request.get_json():
+		abort(400)
+		
+	sentences = np.array(request.get_json())
+	return Response(json.dumps(SentimentAnalysis(sentences)), mimetype='application/json')
+	
 print("Starting machine training.")
 
 fields = ['ItemID', 'Sentiment', 'SentimentText'] 
@@ -15,28 +25,12 @@ y = list(df.Sentiment)
 clf = naive_bayes.MultinomialNB()
 clf.fit(x, y)
 
-test = np.array([
-"I think that item really sucks", 
-"You are bad at this game, please leave",
-"You stupid moron"
-])
-test_vector = vectorizer.transform(test.astype('U'))
-print(clf.predict(test_vector))
-
 print("Finished machine training.")
 
-app = Flask(__name__)
-
-@app.route('/', methods=['POST'])
-def RunSentimentAnalysis():
-	if not request.get_json():
-		abort(400)
-		
-	sentences = np.array(request.get_json())
+def SentimentAnalysis(sentences):
 	test_vector = vectorizer.transform(sentences.astype('U'))
 	prediction = clf.predict(test_vector)
-	predList = prediction.tolist() 
-	return Response(json.dumps(predList), mimetype='application/json')
-	
+	return prediction.tolist() 
+
 if (__name__ == '__main__'):
 	app.run(port=5000)
