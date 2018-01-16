@@ -4,7 +4,9 @@ from sklearn import naive_bayes
 import pandas as pd
 import numpy as np 
 import json 
-from threading import Thread
+import threading
+
+app = Flask(__name__)
 
 vectorizer = TfidfVectorizer(use_idf=True, lowercase=True, strip_accents='ascii')
 clf = naive_bayes.MultinomialNB()
@@ -23,10 +25,14 @@ def SentimentAnalysis(sentences):
 	prediction = clf.predict(test_vector)
 	return prediction.tolist() 
 
-t = Thread(target=TrainSentiment)
-t.start()
+#t = Thread(target=TrainSentiment)
+#t.start()
 
-app = Flask(__name__)
+@app.before_first_request
+def train():
+	print("Before..")
+	thread = threading.Thread(target=TrainSentiment)
+	thread.start() 
 
 @app.route('/', methods=['POST'])
 def RunSentimentAnalysis():
@@ -36,4 +42,4 @@ def RunSentimentAnalysis():
 	return Response(json.dumps(SentimentAnalysis(sentences)), mimetype='application/json')
 
 if (__name__ == '__main__'):
-	app.run(port=5000)
+	app.run(host='0.0.0.0', port=5000, threaded=True)
