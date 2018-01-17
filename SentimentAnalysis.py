@@ -1,4 +1,5 @@
 from flask import Flask, request, Response
+from flask_cors import CORS
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import naive_bayes 
 import pandas as pd
@@ -7,6 +8,7 @@ import json
 import threading
 
 app = Flask(__name__)
+cors = CORS(app)
 
 vectorizer = TfidfVectorizer(use_idf=True, lowercase=True, strip_accents='ascii')
 clf = naive_bayes.MultinomialNB()
