@@ -3,3 +3,4 @@ sklearn==0.0
 pandas==0.21.1
 numpy==1.14.0rc1
 scipy>=1.0.0
+flask_cors
